@@ -1,3 +1,3 @@
-module github.com/mightatnight/headers
+module github.com/broaskaGit/headers
 
 go 1.24.5
