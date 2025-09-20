@@ -13,8 +13,9 @@ type HeaderOpts struct {
 	AcceptEncoding            AcceptEncoding
 	Connection                Connection
 	UserAgent                 UserAgent
-	Referer                   Referer
-	Origin                    Origin
+	Referer                   string
+	Origin                    string
+	Host                      string
 	Authorization             Authorization
 	CacheControl              CacheControl
 	Pragma                    Pragma
@@ -26,18 +27,18 @@ type HeaderOpts struct {
 	XRequestedWith            XRequestedWith
 	XFrameOptions             XFrameOptions
 	XContentTypeOptions       XContentTypeOptions
-	XCSRFToken                XCSRFToken
+	XCSRFToken                string
 	StrictTransportSecurity   StrictTransportSecurity
-	ContentSecurityPolicy     ContentSecurityPolicy
+	ContentSecurityPolicy     string
 	AccessControlAllowOrigin  AccessControlAllowOrigin
 	AccessControlAllowMethods AccessControlAllowMethods
 	AccessControlAllowHeaders AccessControlAllowHeaders
 	Range                     Range
-	IfModifiedSince           IfModifiedSince
-	IfNoneMatch               IfNoneMatch
+	IfModifiedSince           string
+	IfNoneMatch               string
 	ContentDisposition        ContentDisposition
 	Custom                    map[string]string
-	IncludeSec                bool // Include Sec-CH-* headers
+	IncludeSecUserAgent       bool // Include Sec-CH-* headers
 }
 
 // Builder provides a reusable builder for basic headers
@@ -117,10 +118,13 @@ func (hb *Builder) Build(opt HeaderOpts) map[string]string {
 		headers["Content-Type"] = string(opt.ContentType)
 	}
 	if opt.Referer != "" {
-		headers["Referer"] = string(opt.Referer)
+		headers["Referer"] = opt.Referer
 	}
 	if opt.Origin != "" {
-		headers["Origin"] = string(opt.Origin)
+		headers["Origin"] = opt.Origin
+	}
+	if opt.Host != "" {
+		headers["Host"] = opt.Host
 	}
 	if opt.Authorization != "" {
 		headers["Authorization"] = string(opt.Authorization)
@@ -153,10 +157,10 @@ func (hb *Builder) Build(opt HeaderOpts) map[string]string {
 		headers["Range"] = string(opt.Range)
 	}
 	if opt.IfModifiedSince != "" {
-		headers["If-Modified-Since"] = string(opt.IfModifiedSince)
+		headers["If-Modified-Since"] = opt.IfModifiedSince
 	}
 	if opt.IfNoneMatch != "" {
-		headers["If-None-Match"] = string(opt.IfNoneMatch)
+		headers["If-None-Match"] = opt.IfNoneMatch
 	}
 	if opt.ContentDisposition != "" {
 		headers["Content-Disposition"] = string(opt.ContentDisposition)
@@ -170,13 +174,13 @@ func (hb *Builder) Build(opt HeaderOpts) map[string]string {
 		headers["X-Content-Type-Options"] = string(opt.XContentTypeOptions)
 	}
 	if opt.XCSRFToken != "" {
-		headers["X-CSRF-Token"] = string(opt.XCSRFToken)
+		headers["X-CSRF-Token"] = opt.XCSRFToken
 	}
 	if opt.StrictTransportSecurity != "" {
 		headers["Strict-Transport-Security"] = string(opt.StrictTransportSecurity)
 	}
 	if opt.ContentSecurityPolicy != "" {
-		headers["Content-Security-Policy"] = string(opt.ContentSecurityPolicy)
+		headers["Content-Security-Policy"] = opt.ContentSecurityPolicy
 	}
 
 	// CORS headers
@@ -191,7 +195,7 @@ func (hb *Builder) Build(opt HeaderOpts) map[string]string {
 	}
 
 	// Add Sec-CH headers if requested
-	if opt.IncludeSec {
+	if opt.IncludeSecUserAgent {
 		headers["Sec-CH-UA"] = SecCHUserAgentDefault
 		headers["Sec-CH-UA-Full-Version-List"] = SecCHFullVersionDefault
 		headers["Sec-CH-UA-Platform"] = SecCHPlatformDefault
